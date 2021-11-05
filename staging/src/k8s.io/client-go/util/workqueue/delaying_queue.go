@@ -264,14 +264,10 @@ func (q *delayingType) waitingLoop() {
 
 // insert adds the entry to the priority queue, or updates the readyAt if it already exists in the queue
 func insert(q *waitForPriorityQueue, knownEntries map[t]*waitFor, entry *waitFor) {
-	// if the entry already exists, update the time only if it would cause the item to be queued sooner
 	existing, exists := knownEntries[entry.data]
 	if exists {
-		if existing.readyAt.After(entry.readyAt) {
-			existing.readyAt = entry.readyAt
-			heap.Fix(q, existing.index)
-		}
-
+		existing.readyAt = entry.readyAt
+		heap.Fix(q, existing.index)
 		return
 	}
 
