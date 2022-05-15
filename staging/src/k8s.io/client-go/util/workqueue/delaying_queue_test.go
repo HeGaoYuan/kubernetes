@@ -87,21 +87,21 @@ func TestDeduping(t *testing.T) {
 		t.Errorf("should not have added")
 	}
 
-	// step past the first block, we should receive now
+	// step past the first block, we should not receive
 	fakeClock.Step(60 * time.Millisecond)
+	if q.Len() != 0 {
+		t.Errorf("should not have added")
+	}
+
+	// step past the second add
+	fakeClock.Step(20 * time.Millisecond)
 	if err := waitForAdded(q, 1); err != nil {
 		t.Errorf("should have added")
 	}
 	item, _ := q.Get()
 	q.Done(item)
 
-	// step past the second add
-	fakeClock.Step(20 * time.Millisecond)
-	if q.Len() != 0 {
-		t.Errorf("should not have added")
-	}
-
-	// test again, but this time the earlier should override
+	// test again, but this time the earlier time is bigger
 	q.AddAfter(first, 50*time.Millisecond)
 	q.AddAfter(first, 30*time.Millisecond)
 	if err := waitForWaitingQueueToFill(q); err != nil {
